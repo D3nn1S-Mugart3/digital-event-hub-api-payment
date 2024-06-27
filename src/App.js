@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -18,6 +18,7 @@ const stripePromise = loadStripe(
 const CheckoutForm = () => {
   const stripe = useStripe();
   const elements = useElements();
+  const [loading, setloading] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,14 +27,26 @@ const CheckoutForm = () => {
       type: "card",
       card: elements.getElement(CardElement),
     });
+    setloading(true)
 
     if (!error) {
       const { id } = paymentMethod;
 
-      await axios.post('http://localhost:3000/api/checkout', {
-        id,
-        amount: 10000
-      })
+      try {
+        const { data } = await axios.post('http://localhost:3001/api/checkout', {
+          id,
+          amount: 10000,
+        })
+  
+        console.log(data);
+  
+        //*Limpia la tarjeta una vez comprado
+        elements.getElement(CardElement).clear();
+      } catch (error) {
+        console.log(error);
+      }
+
+      setloading(false)
     }
   };
 
@@ -44,12 +57,20 @@ const CheckoutForm = () => {
         alt="k68 keyboard"
         className="img-fluid"
       />
-      <h3></h3>
+      <h3 className="text-center my-2">Price: 100$</h3>
       
       <div className="form-group">
         <CardElement className="form-control"/>
       </div>
-      <button className="btn btn-success">buy</button>
+      <button className="btn btn-success" disabled={!stripe}>
+        {loading ? (
+          <div className="spinner-border text-light" role="status">
+            <span className="sr-only">Loading...</span>
+          </div>
+        ): (
+          "Buy"
+        )}
+      </button>
     </form>
   );
 };
