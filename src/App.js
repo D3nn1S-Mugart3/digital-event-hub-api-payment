@@ -6,6 +6,7 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
+import axios from "axios";
 
 import "bootswatch/dist/lux/bootstrap.min.css";
 import "./App.css";
@@ -25,6 +26,15 @@ const CheckoutForm = () => {
       type: "card",
       card: elements.getElement(CardElement),
     });
+
+    if (!error) {
+      const { id } = paymentMethod;
+
+      await axios.post('http://localhost:3000/api/checkout', {
+        id,
+        amount: 10000
+      })
+    }
   };
 
   return (
@@ -34,6 +44,8 @@ const CheckoutForm = () => {
         alt="k68 keyboard"
         className="img-fluid"
       />
+      <h3></h3>
+      
       <div className="form-group">
         <CardElement className="form-control"/>
       </div>
