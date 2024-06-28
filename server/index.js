@@ -6,7 +6,7 @@ const app = express();
 
 const stripe = new Stripe("sk_test_51PVz1LP0Hf605oErraFcPMgy31oK5mA1xmBizYTF25D0U3BLH01LDl66Rnh5v6eUrCmNNFFs2XzVtEmKar7SeKWy00CrcbJ8FA");
 
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors());
 app.use(express.json());
 
 app.post('/api/checkout', async (req, res) => {
