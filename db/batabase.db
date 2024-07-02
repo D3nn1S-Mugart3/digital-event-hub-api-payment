@@ -1,0 +1,173 @@
+CREATE DATABASE bgivundzrylpnlvsapmh;
+
+USE bgivundzrylpnlvsapmh;
+
+CREATE TABLE Membresia (
+    membresia_id INT PRIMARY KEY AUTO_INCREMENT,
+    tipo VARCHAR(50),
+    descripcion TEXT,
+    costo DECIMAL(10, 2)
+);
+
+CREATE TABLE Roles (
+    rol_id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(50)
+);
+
+CREATE TABLE Permisos (
+    permiso_id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE Tipos_Evento (
+    tipo_evento_id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100)
+);
+
+CREATE TABLE Validacion (
+    validacion_id INT PRIMARY KEY AUTO_INCREMENT,
+    estado VARCHAR(50),
+    comentarios TEXT
+);
+
+CREATE TABLE Categorias (
+    categoria_id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100)
+);
+
+CREATE TABLE Tipos_Pago (
+    tipo_pago_id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(50)
+);
+
+CREATE TABLE Usuarios (
+    usuario_id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    contrasena VARCHAR(255),
+    telefono VARCHAR(20),
+    rol_id INT,
+    membresia_id INT,
+    activo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (rol_id) REFERENCES Roles (rol_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (membresia_id) REFERENCES Membresia (membresia_id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE TABLE Eventos (
+    evento_id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100),
+    fecha_inicio DATE,
+    fecha_termino DATE,
+    hora TIME,
+    tipo_evento_id INT,
+    organizador_id INT,
+    categoria_id INT,
+    ubicacion VARCHAR(255),
+    max_per INT,
+    estado VARCHAR(50),
+    autorizado_por INT,
+    fecha_autorizacion DATETIME,
+    validacion_id INT,
+    FOREIGN KEY (tipo_evento_id) REFERENCES Tipos_Evento (tipo_evento_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (organizador_id) REFERENCES Usuarios (usuario_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (validacion_id) REFERENCES Validacion (validacion_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (categoria_id) REFERENCES Categorias (categoria_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (autorizado_por) REFERENCES Usuarios (usuario_id)
+);
+
+CREATE TABLE Detalles_Evento (
+    detalle_evento_id INT PRIMARY KEY AUTO_INCREMENT,
+    evento_id INT,
+    descripcion VARCHAR(250),
+    requerimientos VARCHAR(250),
+    FOREIGN KEY (evento_id) REFERENCES Eventos (evento_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Imagenes (
+    imagen_id INT PRIMARY KEY AUTO_INCREMENT,
+    usuario_id INT,
+    evento_id INT,
+    imagen_url VARCHAR(255),
+    es_principal BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (usuario_id) REFERENCES Usuarios (usuario_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (evento_id) REFERENCES Eventos (evento_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Pagos (
+    pago_id INT PRIMARY KEY AUTO_INCREMENT,
+    monto DECIMAL(10, 2),
+    fecha DATE,
+    tipo_pago_id INT,
+    usuario_id INT,
+    evento_id INT,
+    FOREIGN KEY (tipo_pago_id) REFERENCES Tipos_Pago (tipo_pago_id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (usuario_id) REFERENCES Usuarios (usuario_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (evento_id) REFERENCES Eventos (evento_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Pago_Tarjeta (
+    tarjeta_id INT PRIMARY KEY AUTO_INCREMENT,
+    numero_tarjeta VARCHAR(255) NOT NULL,
+    fecha_expiracion DATE NOT NULL,
+    cvv VARCHAR(4) NOT NULL,
+    pago_id INT,
+    FOREIGN KEY (pago_id) REFERENCES Pagos (pago_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Asistentes (
+    asistente_id INT PRIMARY KEY AUTO_INCREMENT,
+    usuario_id INT,
+    evento_id INT,
+    FOREIGN KEY (usuario_id) REFERENCES Usuarios (usuario_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (evento_id) REFERENCES Eventos (evento_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Tokens (
+    token_id INT PRIMARY KEY AUTO_INCREMENT,
+    usuario_id INT,
+    token VARCHAR(255),
+    expiracion DATETIME,
+    FOREIGN KEY (usuario_id) REFERENCES Usuarios (usuario_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Asientos (
+    asiento_id INT PRIMARY KEY AUTO_INCREMENT,
+    numero_asiento VARCHAR(10),
+    estado VARCHAR(20) DEFAULT 'Disponible',
+    usuario_id INT,
+    FOREIGN KEY (usuario_id) REFERENCES Usuarios (usuario_id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE TABLE Comentarios (
+    comentario_id INT PRIMARY KEY AUTO_INCREMENT,
+    usuario_id INT,
+    evento_id INT,
+    comentario TEXT,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES Usuarios (usuario_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (evento_id) REFERENCES Eventos (evento_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Errores_Logs (
+    log_id INT PRIMARY KEY AUTO_INCREMENT,
+    usuario_id INT,
+    mensaje TEXT,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES Usuarios (usuario_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Escenario (
+    escenario_id INT PRIMARY KEY AUTO_INCREMENT,
+    asiento INT,
+    forma ENUM('Redondo', 'Cuadrado', 'Triangular'),
+    evento_id INT,
+    FOREIGN KEY (evento_id) REFERENCES Eventos (evento_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Roles_Permisos (
+    rol_id INT,
+    permiso_id INT,
+    PRIMARY KEY (rol_id, permiso_id),
+    FOREIGN KEY (rol_id) REFERENCES Roles (rol_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (permiso_id) REFERENCES Permisos (permiso_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
