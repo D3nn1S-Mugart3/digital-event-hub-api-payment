@@ -40,7 +40,7 @@ const PagoTarjeta = sequelize.define(
   }
 );
 
-Pago.hasOne(PagoTarjeta, { foreignKey: "pago_id" });
-PagoTarjeta.belongsTo(Pago, { foreignKey: "pago_id" });
+Pago.hasOne(PagoTarjeta, { foreignKey: "pago_id", as: "PagoTarjeta" });
+PagoTarjeta.belongsTo(Pago, { foreignKey: "pago_id", as: "Pago" });
 
 module.exports = { Pago, PagoTarjeta };

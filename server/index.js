@@ -13,6 +13,25 @@ const stripe = new Stripe(
 app.use(cors());
 app.use(express.json());
 
+//Metodo GET
+app.get("/api/payments", async (req, res) => {
+  try {
+    const payments = await Pago.findAll({
+      include: [
+        {
+          model: PagoTarjeta,
+          as: "PagoTarjeta",
+        },
+      ],
+    });
+    res.json(payments); // Enviar la respuesta al cliente
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+//Metodo POST
 app.post("/api/checkout", async (req, res) => {
   try {
     const { id, amount, cardDetails } = req.body;
